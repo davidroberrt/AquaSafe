@@ -1,8 +1,8 @@
 //
-//  LocationsView.swift
+//  HomeView.swift
 //  SwiftfulMapApp
 //
-//  Created by Nick Sarno on 11/27/21.
+//  Created by David Robert on 11/02/25.
 //
 
 import SwiftUI
@@ -10,8 +10,8 @@ import MapKit
 import CoreLocation
 
 struct LocationsView: View {
-    
-    @EnvironmentObject private var vm: LocationsViewModel
+    @State private var selectedView: String = "LocationsView"
+    @EnvironmentObject private var viewModel: LocationsViewModel
     @State private var isMenuOpen = false
     @State private var showLocationForm: Bool = false
     @State private var newLocationName: String = ""
@@ -27,63 +27,83 @@ struct LocationsView: View {
         )
     )
     
+    @State private var showPlusButtons = false  // Estado para mostrar/ocultar os botões
+    @State private var selectedNumber: Int = 0  // Variável para armazenar o número selecionado
+
+    
     let maxWidthForIpad: CGFloat = 700
     
     var body: some View {
         ZStack {
-
-            // Menu Lateral
-            SideMenuView(isMenuOpen: $isMenuOpen)
+            SideMenuView(isMenuOpen: $isMenuOpen, selectedView: $selectedView)
                 .animation(.linear(duration: 0.3), value: isMenuOpen)
-            mapLayer.ignoresSafeArea()
-                .cornerRadius(isMenuOpen ? 20 : 0)
+            switch selectedView {
+            case "HomeView":
+                HomeView(selectedView: $selectedView)
+            case "NotificationsView":
+                HomeView(selectedView: $selectedView)
+            case "SettingsView":
+                HomeView(selectedView: $selectedView)
+            case "Signout":
+                HomeView(selectedView: $selectedView)
+            default:
+
+                mapLayer.ignoresSafeArea()
+                    .cornerRadius(isMenuOpen ? 20 : 0)
+                    .frame(
+                        maxWidth: isMenuOpen ? UIScreen.main.bounds.width * 0.75 : UIScreen.main.bounds.width ,
+                        maxHeight: isMenuOpen ? UIScreen.main.bounds.height * 0.75 : UIScreen.main.bounds.height
+                    )
+                    .offset(x: isMenuOpen ? 250 : 0)
+                    .scaleEffect(isMenuOpen ? 0.85 : 1)
+                    .onTapGesture {
+                        withAnimation {
+                            isMenuOpen = false
+                        }
+                    }
+                    .ignoresSafeArea(.all)
+                    .animation(.spring, value: isMenuOpen)
+                
+                // Conteúdo principal com animações suaves
+                VStack(spacing: 0) {
+                    header
+                        .padding()
+                        .frame(maxWidth: maxWidthForIpad)
+                        .scaleEffect(isMenuOpen ? 0.85 : 1)
+                        .animation(.spring, value: isMenuOpen)
+                    Spacer()
+                    HStack{
+                        Spacer()
+                        if isMenuOpen == false{
+                            categoryLocationAddButtons
+                                .scaleEffect(isMenuOpen ? 0.85 : 1)
+                                .animation(.spring, value: isMenuOpen)
+                        }
+                    }
+                    locationsPreviewStack
+                        .scaleEffect(isMenuOpen ? 0.85 : 1)
+                        .animation(.spring, value: isMenuOpen)
+                }
                 .frame(
-                    maxWidth: isMenuOpen ? UIScreen.main.bounds.width * 0.75 : UIScreen.main.bounds.width ,
+                    maxWidth: isMenuOpen ? UIScreen.main.bounds.width * 0.75 : UIScreen.main.bounds.width,
                     maxHeight: isMenuOpen ? UIScreen.main.bounds.height * 0.75 : UIScreen.main.bounds.height
                 )
                 .offset(x: isMenuOpen ? 250 : 0)
                 .scaleEffect(isMenuOpen ? 0.85 : 1)
+                .animation(.spring, value: isMenuOpen)
                 .onTapGesture {
                     withAnimation {
                         isMenuOpen = false
                     }
                 }
-                .ignoresSafeArea(.all)
-                .animation(.spring, value: isMenuOpen)
-
-            // Conteúdo principal com animações suaves
-            VStack(spacing: 0) {
-                header
-                    .padding()
-                    .frame(maxWidth: maxWidthForIpad)
-                    .scaleEffect(isMenuOpen ? 0.85 : 1)
-                    .animation(.spring, value: isMenuOpen)
-                
-                Spacer()
-                
-                locationsPreviewStack
-                    .scaleEffect(isMenuOpen ? 0.85 : 1)
-                    .animation(.spring, value: isMenuOpen)
-            }
-            .frame(
-                maxWidth: isMenuOpen ? UIScreen.main.bounds.width * 0.75 : UIScreen.main.bounds.width,
-                maxHeight: isMenuOpen ? UIScreen.main.bounds.height * 0.75 : UIScreen.main.bounds.height
-            )
-            .offset(x: isMenuOpen ? 250 : 0)
-            .scaleEffect(isMenuOpen ? 0.85 : 1)
-            .animation(.spring, value: isMenuOpen)
-            .onTapGesture {
-                withAnimation {
-                    isMenuOpen = false
-                }
             }
         }
-        .sheet(item: $vm.sheetLocation, onDismiss: nil) { location in
+        .sheet(item: $viewModel.sheetLocation, onDismiss: nil) { location in
                    LocationDetailView(location: location)
                }
         .sheet(isPresented: $showLocationForm) {
             // Exibir o formulário para adicionar ou editar a localização
-            LocationFormView(location: $selectedLocation, name: $newLocationName, description: $newLocationDescription, onSave: saveLocation, onDelete: deleteLocation)
+            LocationFormView(viewModel: viewModel, location: $selectedLocation, name: $newLocationName, description: $newLocationDescription, selectedNumber: $selectedNumber, onSave: saveLocation, onDelete: deleteLocation)
         }
     }
 }
@@ -115,24 +135,29 @@ extension LocationsView {
                 }
                 
                 Spacer()
-                Button(action: vm.toggleLocationsList) {
-                    Text(vm.mapLocation.name + ", " + vm.mapLocation.cityName)
+                Button(action: {
+                    withAnimation{
+                        viewModel.toggleLocationsList()
+                        showPlusButtons = false
+                    }
+                }) {
+                    Text(viewModel.mapLocation.category)
                         .font(.title2)
                         .fontWeight(.black)
                         .foregroundColor(.primary)
                         .frame(height: 55)
                         .frame(maxWidth: .infinity)
-                        .animation(.none, value: vm.mapLocation)
+                        .animation(.none, value: viewModel.mapLocation)
                         .overlay(alignment: .leading) {
                             Image(systemName: "arrow.down")
                                 .font(.headline)
                                 .foregroundColor(.primary)
                                 .padding()
-                                .rotationEffect(Angle(degrees: vm.showLocationsList ? 180 : 0))
+                                .rotationEffect(Angle(degrees: viewModel.showLocationsList ? 180 : 0))
                         }
                 }
             }
-            if vm.showLocationsList {
+            if viewModel.showLocationsList {
                 LocationsListView()
                     .frame(height: 150)
             }
@@ -142,50 +167,125 @@ extension LocationsView {
         .shadow(color: Color.black.opacity(0.3), radius: 20, x: 0, y: 15)
     }
     
-    private var mapLayer: some View {
-        MapReader { proxy in
-            Map(position: $vm.mapRegion) {
-                //se o botao de criar nova localizacao for clicado, exibir o annotation:
-                if let coordinate = selectedCoordinate {
-                    Annotation("üi", coordinate: coordinate) {
-                        LocationMapAnnotationView(iconName: "house.badge.exclamationmark", color: .red)
+    private var categoryLocationAddButtons: some View {
+        VStack {
+            // Botão "+" para mostrar os outros botões
+            Button(action: {
+                withAnimation {
+                    showPlusButtons.toggle() // Alterna a visibilidade dos botões
+                    if showPlusButtons == false {
+                        selectedNumber = 0
+                    }
+                    if showPlusButtons == true {
+                        viewModel.showLocationsList = false // close the buttons, if menu is open
                     }
                 }
-                ForEach(vm.locations) { location in
-                    Annotation(location.name, coordinate: location.coordinates) {
-                        LocationMapAnnotationView(iconName: "house.badge.exclamationmark", color: .red)
-                            .scaleEffect(vm.mapLocation == location ? 1 : 0.7)
-                            .onTapGesture {
-                                // Ao clicar na marcação, habilitar a edição ou exclusão
-                                selectedLocation = location
-                                newLocationName = location.name
-                                newLocationDescription = location.description
-                                vm.showNextLocation(location: location)
-                                if let selectedLocation = selectedLocation, let index = vm.locations.firstIndex(where: { $0.id == selectedLocation.id }), index >= 5 { // NAO PERMITE ALTERAR 5
-                                    showLocationForm = true
-                                    return
-                                }
-                            }
-                    }
-                }
+            }) {
+                Image(systemName: "plus.circle.fill")
+                    .resizable()
+                    .frame(width: showPlusButtons == true ? 50 : 60, height: showPlusButtons == true ? 50 : 60)
+                    .foregroundColor(showPlusButtons == true ? .accentColor.opacity(0.3) : .accentColor.opacity(0.8))
+                    .rotationEffect(.degrees(showPlusButtons == true ? 45 : 0 * (showPlusButtons == true ? 1 : -1) ))
             }
-            //se o botao de criar nova localizacao for clicado, exibir o annotation:
-
-            .onTapGesture { location in
-                if let tappedCoordinate = proxy.convert(location, from: .local) {
-                    selectedCoordinate = tappedCoordinate
-                    newLocationName = ""
-                    newLocationDescription = ""
-                    showLocationForm = true
+            .frame(maxWidth: .infinity, alignment: .trailing) // Alinha tudo à direita
+            
+            .padding()
+            
+            if showPlusButtons {
+                VStack(spacing: 20) {
+                    ForEach(1..<6) { number in
+                        HStack {
+                            // Exibe o nome apenas no botão selecionado
+                            if selectedNumber == number {
+                                RoundedRectangle(cornerRadius: 10)
+                                    .fill(.ultraThinMaterial)
+                                    .frame(width: 150, height: 40) // Ajuste de tamanho
+                                    .overlay(
+                                        Text(viewModel.buttonCategoryName(for: number))
+                                            .foregroundColor(.primary)
+                                            .bold()
+                                    )
+                                    .opacity(selectedNumber == number ? 1 : 0) // Desaparece suavemente
+                                    .animation(.easeInOut(duration: 0.2), value: selectedNumber) // Transição mais rápida
+                                
+                            }
+                            
+                            // Agora, apenas o círculo é um botão
+                            Button(action: {
+                                withAnimation {
+                                    selectedNumber = (selectedNumber == number) ? 0 : number // Alterna a seleção
+                                }
+                            }) {
+                                Circle()
+                                    .fill(viewModel.buttonColor(for: number)) // Cor dinâmica para cada botão
+                                    .frame(width: 50, height: 50)
+                                    .overlay(
+                                        Image(systemName: viewModel.buttonIcon(for: number)) // Ícone dinâmico
+                                            .foregroundColor(.white)
+                                    )
+                                    .shadow(radius: 5)
+                            }
+                        }
+                        .padding(.trailing, 15) // Mantém alinhado à direita
+                        .frame(maxWidth: .infinity, alignment: .trailing) // Alinha tudo à direita
+                    }
                 }
             }
         }
     }
     
+    private var mapLayer: some View {
+        MapReader { proxy in
+            if selectedNumber != 0 {
+                mapAddButton
+                    .onTapGesture(coordinateSpace: .local) { tapLocation in
+                        if selectedNumber != 0 { // Só adiciona localização se um botão estiver selecionado
+                            if let tappedCoordinate = proxy.convert(tapLocation, from: .local) {
+                                selectedCoordinate = tappedCoordinate
+                                newLocationName = ""
+                                newLocationDescription = ""
+                                showLocationForm = true
+                            }
+                        }
+                    }
+
+            } else {
+                Map(position: $viewModel.mapRegion) {
+                    //se o botao de criar nova localizacao for clicado, exibir o annotation:
+                    ForEach(viewModel.locations) { location in
+                        Annotation(location.category, coordinate: location.coordinates) {
+                            LocationMapAnnotationView(iconName: location.icon, color: location.color)
+                                .scaleEffect(viewModel.mapLocation == location ? 1 : 0.7)
+                                .onTapGesture {
+                                    viewModel.mapLocation = location // Força a atualização
+                                    viewModel.showNextLocation(location: location)
+                                    //if let selectedLocation = selectedLocation, let index = viewModel.locations.firstIndex(where: { $0.id == selectedLocation.id }), index >= 5 { // NAO PERMITE ALTERAR 5
+                                        //showLocationForm = true
+                                        //return
+                                    //}
+                                }
+                        }
+                    }
+                }
+                .mapStyle(.standard)
+            }
+        }
+    }
+    private var mapAddButton: some View {
+        Map(position: $viewModel.mapRegion) {
+            //se o botao de criar nova localizacao for clicado, exibir o annotation:
+            if let coordinate = selectedCoordinate {
+                Annotation(viewModel.buttonCategoryName(for: selectedNumber), coordinate: coordinate) {
+                    LocationMapAnnotationView(iconName: viewModel.buttonIcon(for: selectedNumber), color: viewModel.buttonColor(for: selectedNumber))
+                }
+            }
+        }
+        
+    }
     private var locationsPreviewStack: some View {
         ZStack {
-            ForEach(vm.locations) { location in
-                if vm.mapLocation == location {
+            ForEach(viewModel.locations) { location in
+                if viewModel.mapLocation == location {
                     LocationPreviewView(location: location)
                         .shadow(color: Color.black.opacity(0.3), radius: 20)
                         .padding()
@@ -199,45 +299,43 @@ extension LocationsView {
         }
     }
 
-
     
     // Função para salvar a localização
     private func saveLocation() {
         guard let coordinate = selectedCoordinate else { return }
         
-        let location = Location(name: newLocationName, cityName: cityName, coordinates: coordinate, description: newLocationDescription, imageNames: [""], link: "")
+        let location = Location(name: newLocationName, cityName: cityName, coordinates: coordinate, description: newLocationDescription, imageNames: [""], category: viewModel.buttonCategoryName(for: selectedNumber), icon: viewModel.buttonIcon(for: selectedNumber), color: viewModel.buttonColor(for: selectedNumber))
         
         if let selectedLocation = selectedLocation {
             // Impedir a alteração do item de índice 0
-            if let index = vm.locations.firstIndex(where: { $0.id == selectedLocation.id }) {
+            if let index = viewModel.locations.firstIndex(where: { $0.id == selectedLocation.id }) {
                 if index == 0 {
                     // Não permita alteração do primeiro item
                     return
                 }
-                vm.locations[index] = location
+                viewModel.locations[index] = location
             }
         } else {
             // Adicionar nova localização
-            vm.locations.append(location)
+            viewModel.locations.append(location)
         }
         
         clearInputs()
+        
     }
-
     
     // Função para excluir a localização
     private func deleteLocation() {
-        if let selectedLocation = selectedLocation, let index = vm.locations.firstIndex(where: { $0.id == selectedLocation.id }) {
+        if let selectedLocation = selectedLocation, let index = viewModel.locations.firstIndex(where: { $0.id == selectedLocation.id }) {
             // Impedir a exclusão do item de índice 0
             if index == 0 {
                 // Não permita excluir o primeiro item
                 return
             }
-            vm.locations.remove(at: index)
+            viewModel.locations.remove(at: index)
         }
         clearInputs()
     }
-
     
     // Limpar campos e estados
     private func clearInputs() {
@@ -246,37 +344,5 @@ extension LocationsView {
         selectedCoordinate = nil
         selectedLocation = nil
         showLocationForm = false
-    }
-}
-
-import SwiftUI
-
-struct LocationFormView: View {
-    @Binding var location: Location?
-    @Binding var name: String
-    @Binding var description: String
-    var onSave: () -> Void
-    var onDelete: () -> Void
-    
-    var body: some View {
-        VStack {
-            TextField("Nome da Localização", text: $name)
-            TextField("Descrição da localização", text: $description)
-            
-            HStack {
-                Button("Salvar") {
-                    onSave()
-                }
-                .disabled(name.isEmpty || description.isEmpty)
-                
-                if location != nil {
-                    Button("Excluir") {
-                        onDelete()
-                    }
-                    .foregroundColor(.red)
-                }
-            }
-        }
-        .padding()
     }
 }

@@ -1,7 +1,16 @@
+//
+//  HomeView.swift
+//  AquaSafe
+//
+//  Created by David Robert on 14/02/25.
+//
+
+
 import SwiftUI
 
 struct SideMenuView: View {
     @Binding var isMenuOpen: Bool
+    @Binding var selectedView: String// Tela inicial
     @State private var gradientColors: [Color] = [Color.white, Color.accentColor]
     
     var body: some View {
@@ -21,6 +30,7 @@ struct SideMenuView: View {
                     .ignoresSafeArea()
             }
             
+            
             HStack {
                 VStack(alignment: .leading, spacing: 20) {
                     Text("AquaSafe")
@@ -29,12 +39,30 @@ struct SideMenuView: View {
                         .foregroundColor(.white)
                         .padding(.top, 40)
                     Spacer()
-                    MenuItem(icon: "house", title: "Home")
-                    MenuItem(icon: "map", title: "Map")
-                    MenuItem(icon: "bell", title: "Notifications")
-                    MenuItem(icon: "gearshape", title: "Settings")
+                    MenuItem(icon: "house", title: "Home") {
+                        withAnimation(.spring(duration: 3)){
+                            selectedView = "HomeView"
+                            isMenuOpen = false
+                        }
+                    }
+                    MenuItem(icon: "map", title: "Map") {
+                        selectedView = "LocationsView"
+                        isMenuOpen = false
+                    }
+
+                    MenuItem(icon: "bell", title: "Notifications") {
+                        selectedView = "NotificationsView"
+                        isMenuOpen = false
+                    }
+                    MenuItem(icon: "gearshape", title: "Settings") {
+                        selectedView = "SettingsView"
+                        isMenuOpen = false
+                    }
                     Spacer()
-                    MenuItem(icon: "arrow.left.circle", title: "Signout")
+                    MenuItem(icon: "arrow.left.circle", title: "Signout") {
+                        // Adicione a lógica de logout aqui
+                        isMenuOpen = false
+                    }
                     Spacer()
                 }
                 .padding(.top, 50)
@@ -77,28 +105,32 @@ struct SideMenuView: View {
 struct MenuItem: View {
     var icon: String
     var title: String
-    
+    var action: () -> Void  // Adiciona uma ação de clique
+
     var body: some View {
-        HStack {
-            Image(systemName: icon)
-                .font(.headline)
-                .foregroundColor(.white)
-            
-            Text(title)
-                .font(.headline)
-                .foregroundColor(.white)
+        Button(action: action) {  // Usa a ação ao clicar
+            HStack {
+                Image(systemName: icon)
+                    .font(.headline)
+                    .foregroundColor(.white)
+                
+                Text(title)
+                    .font(.headline)
+                    .foregroundColor(.white)
+            }
+            .padding(.vertical, 10)
+            .padding(.horizontal)
         }
-        .padding(.vertical, 10)
-        .padding(.horizontal)
     }
 }
 
+
 struct ContentView: View {
     @State private var isMenuOpen = false
-    
+    @Binding var selectedView: String
     var body: some View {
         ZStack {
-            SideMenuView(isMenuOpen: $isMenuOpen)
+            SideMenuView(isMenuOpen: $isMenuOpen, selectedView: $selectedView)
             
             NavigationView {
                 VStack {
@@ -149,9 +181,10 @@ struct ContentView: View {
         }
     }
 }
-
+/*
 struct SideMenuView_Previews: PreviewProvider {
     static var previews: some View {
-        ContentView()
+        ContentView(selectedView: $selectedView)
     }
 }
+*/

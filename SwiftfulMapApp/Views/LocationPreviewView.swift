@@ -1,8 +1,8 @@
 //
-//  LocationPreviewView.swift
-//  SwiftfulMapApp
+//  HomeView.swift
+//  AquaSafe
 //
-//  Created by Nick Sarno on 11/28/21.
+//  Created by David Robert on 14/02/25.
 //
 
 import SwiftUI
@@ -65,7 +65,7 @@ extension LocationPreviewView {
     
     private var titleSection: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text(location.name)
+            Text(location.category)
                 .font(.title2)
                 .fontWeight(.bold)
             
@@ -79,7 +79,7 @@ extension LocationPreviewView {
         Button {
             vm.sheetLocation = location
         } label: {
-            Text("Learn more")
+            Text("View more")
                 .font(.headline)
                 .frame(width: 125, height: 35)
         }

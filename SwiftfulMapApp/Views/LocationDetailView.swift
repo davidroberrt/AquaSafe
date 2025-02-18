@@ -1,8 +1,8 @@
 //
-//  LocationDetailView.swift
-//  SwiftfulMapApp
+//  HomeView.swift
+//  AquaSafe
 //
-//  Created by Nick Sarno on 11/28/21.
+//  Created by David Robert on 14/02/25.
 //
 
 import SwiftUI
@@ -25,6 +25,11 @@ struct LocationDetailView: View {
                     descriptionSection
                     Divider()
                     mapLayer
+                    Button("Go to Apple Maps") {
+                        openMaps()
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .padding()
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding()
@@ -76,12 +81,6 @@ extension LocationDetailView {
             Text(location.description)
                 .font(.subheadline)
                 .foregroundColor(.secondary)
-            
-            if let url = URL(string: location.link) {
-                Link("Read more on Wikipedia", destination: url)
-                    .font(.headline)
-                    .tint(.blue)
-            }
         }
     }
     
@@ -95,7 +94,7 @@ extension LocationDetailView {
             )
         ) {
             Annotation("",coordinate: location.coordinates) {
-                LocationMapAnnotationView(iconName: "house.badge.exclamationmark", color: .red)
+                LocationMapAnnotationView(iconName: location.icon, color: location.color)
                     .shadow(radius: 10)
             }
         }
@@ -117,6 +116,28 @@ extension LocationDetailView {
                 .shadow(radius: 4)
                 .padding()
         }
+    }
 
+    private func openMaps() {
+        let coordinate = location.coordinates
+        
+        let regionDistance: CLLocationDistance = 1000
+        let regionSpan = MKCoordinateRegion(
+            center: coordinate,
+            latitudinalMeters: regionDistance,
+            longitudinalMeters: regionDistance
+        )
+        
+        // Criar o MKMapItem com as coordenadas
+        let mapItem = MKMapItem(placemark: MKPlacemark(coordinate: coordinate))
+        
+        // Definir o nome da localização para o MapItem
+        mapItem.name = location.category
+        
+        // Abrir o Mapas
+        mapItem.openInMaps(launchOptions: [
+            MKLaunchOptionsMapCenterKey: NSValue(mkCoordinate: regionSpan.center),
+            MKLaunchOptionsMapSpanKey: NSValue(mkCoordinateSpan: regionSpan.span)
+        ])
     }
 }

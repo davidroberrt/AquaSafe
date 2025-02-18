@@ -1,9 +1,16 @@
+//
+//  HomeView.swift
+//  SwiftfulMapApp
+//
+//  Created by David Robert on 14/02/25.
+//
+
 import SwiftUI
 
 struct LocationsListView: View {
     
     @EnvironmentObject private var vm: LocationsViewModel
-    @AppStorage("selectedIndex") private var selectedIndex: Int = 1  // Armazenando o índice selecionado de forma persistente
+    @AppStorage("selectedIndex") private var selectedIndex: Int = 0  // Armazenando o índice selecionado de forma persistente
     
     var body: some View {
         GeometryReader { geometry in
@@ -52,8 +59,14 @@ struct LocationsListView: View {
                     }
                     .onAppear {
                         // Ao aparecer, centraliza o item com base no selectedIndex
-                        withAnimation(.easeOut(duration: 0.5)) {
-                            scrollProxy.scrollTo(vm.locations[selectedIndex].id, anchor: .center)
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                            if !vm.locations.isEmpty, selectedIndex < vm.locations.count {
+                                withAnimation(.easeOut(duration: 0.5)) {
+                                    scrollProxy.scrollTo(vm.locations[selectedIndex].id, anchor: .center)
+                                }
+                            } else {
+                                selectedIndex = 0  // Garante um índice válido
+                            }
                         }
                     }
                 }
@@ -66,16 +79,17 @@ struct LocationsListView: View {
     
     private func listRowView(location: Location, scale: CGFloat) -> some View {
         VStack {
-            if let imageName = location.imageNames.first {
-                Image(imageName)
+            if location.imageNames.first != nil {
+                Image(systemName: location.icon)
                     .resizable()
                     .scaledToFill()
                     .frame(width: 50, height: 50)
-                    .cornerRadius(10)
+                    .padding()
+                    .foregroundStyle(Color(location.color))
             }
             
             VStack(alignment: .center) {
-                Text(location.name)
+                Text(location.category)
                     .font(.headline)
                     .lineLimit(1)
                 Text(location.cityName)
@@ -92,6 +106,6 @@ struct LocationsListView: View {
 struct LocationsListView_Previews: PreviewProvider {
     static var previews: some View {
         LocationsListView()
-            .environmentObject(LocationsViewModel()) // Certifique-se de passar o environmentObject para o Preview
+            .environmentObject(LocationsViewModel()) 
     }
 }

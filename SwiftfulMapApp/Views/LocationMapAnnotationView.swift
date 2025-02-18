@@ -1,3 +1,10 @@
+//
+//  HomeView.swift
+//  AquaSafe
+//
+//  Created by David Robert on 14/02/25.
+//
+
 import SwiftUI
 
 struct LocationMapAnnotationView: View {
@@ -25,18 +32,17 @@ struct LocationMapAnnotationView: View {
                 .frame(width: 10, height: 10)
                 .rotationEffect(Angle(degrees: 180))
                 .offset(y: -3)
-                .padding(.bottom, 40)
         }
         .shadow(color: color, radius: shadow)
-        .onAppear {
+        /*.onAppear {
             // Alternar o tamanho do círculo
-            Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { _ in
-                withAnimation(.easeInOut(duration: 0.5)) {
-                    shadow = shadow == 10.0 ? 5.0 : 10.0
+            /*Timer.scheduledTimer(withTimeInterval: 2, repeats: true) { _ in
+                withAnimation(.easeInOut(duration: 2)) {
+                    shadow = shadow == 15.0 ? 5.0 : 15.0
                     //blurAmount = 10.0
                 }
-            }
-        }
+            }*/
+        }*/
     }
 }
 

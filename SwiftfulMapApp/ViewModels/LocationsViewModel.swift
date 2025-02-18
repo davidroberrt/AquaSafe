@@ -1,8 +1,8 @@
 //
-//  LocationsViewModel.swift
-//  SwiftfulMapApp
+//  HomeView.swift
+//  AquaSafe
 //
-//  Created by Nick Sarno on 11/27/21.
+//  Created by David Robert on 14/02/25.
 //
 
 import Foundation
@@ -11,17 +11,12 @@ import SwiftUI
 
 class LocationsViewModel: ObservableObject {
     
-    // All loaded locations
-    @Published var locations: [Location]
-    
-    // Current location on map
+    @Published var locations: [Location] = LocationsDataService.locations
     @Published var mapLocation: Location {
         didSet {
             updateMapRegion(location: mapLocation)
         }
     }
-    
-    // Current region on map
     @Published var mapRegion: MapCameraPosition = .region(
         MKCoordinateRegion(
             center: CLLocationCoordinate2D(latitude: 51.507222, longitude: -0.1275),
@@ -30,19 +25,36 @@ class LocationsViewModel: ObservableObject {
     )
     let mapSpan = MKCoordinateSpan(latitudeDelta: 0.1, longitudeDelta: 0.1)
     
-    // Show list of locations
-    @Published var showLocationsList: Bool = false
-    @Published var showMenuList: Bool = false
-    // Show location detail via sheet
+    @Published var showLocationsList = false
+    @Published var showMenuList = false
     @Published var sheetLocation: Location? = nil
     
+    // Initializer to load locations and set the first one as the map center
     init() {
         let locations = LocationsDataService.locations
         self.locations = locations
-        self.mapLocation = locations.first!
         
-        self.updateMapRegion(location: locations.first!)
+        // Ensure mapLocation is always initialized to a valid location
+        if let firstLocation = locations.first {
+            self.mapLocation = firstLocation
+        } else {
+            // Fallback: set a default location with all required fields
+            self.mapLocation = Location(
+                name: "Default Location",
+                cityName: "Unknown City",
+                coordinates: CLLocationCoordinate2D(latitude: 51.507222, longitude: -0.1275),
+                description: "This is a default location",
+                imageNames: [],
+                category: "Default",
+                icon: "default_icon", // exemplo de ícone
+                color: .gray // exemplo de cor
+            )
+        }
+        
+        updateMapRegion(location: mapLocation)
     }
+    
+
     
     private func updateMapRegion(location: Location) {
         withAnimation(.easeInOut) {
@@ -54,20 +66,22 @@ class LocationsViewModel: ObservableObject {
             )
         }
     }
-
+    
+    // Toggle visibility of locations list
     func toggleLocationsList() {
         withAnimation(.easeInOut) {
-//            showLocationsList = !showLocationsList
             showLocationsList.toggle()
         }
     }
+    
+    // Toggle visibility of menu list
     func toggleMenuList() {
         withAnimation(.easeInOut) {
-//            showLocationsList = !showLocationsList
             showMenuList.toggle()
         }
     }
     
+    // Show next location and update map
     func showNextLocation(location: Location) {
         withAnimation(.easeInOut) {
             mapLocation = location
@@ -75,26 +89,29 @@ class LocationsViewModel: ObservableObject {
         }
     }
     
+    // Handle the 'next' button logic
     func nextButtonPressed() {
-        // Get the current index
         guard let currentIndex = locations.firstIndex(where: { $0 == mapLocation }) else {
-            print("Could not find current index in locations array! Should never happen.")
+            print("Current location not found in locations array.")
             return
         }
         
-        // Check if the currentIndex is valid
         let nextIndex = currentIndex + 1
-        guard locations.indices.contains(nextIndex) else {
-            // Next index is NOT valid
-            // Restart from 0
-            guard let firstLocation = locations.first else { return }
-            showNextLocation(location: firstLocation)
-            return
-        }
+        let nextLocation = (locations.indices.contains(nextIndex)) ? locations[nextIndex] : locations.first
+        guard let location = nextLocation else { return }
         
-        // Next index IS valid
-        let nextLocation = locations[nextIndex]
-        showNextLocation(location: nextLocation)
+        showNextLocation(location: location)
     }
     
+    func buttonColor(for number: Int) -> Color {
+        LocationCategory(rawValue: number)?.color ?? .gray
+    }
+
+    func buttonIcon(for number: Int) -> String {
+        LocationCategory(rawValue: number)?.icon ?? "questionmark.circle.fill"
+    }
+
+    func buttonCategoryName(for number: Int) -> String {
+        LocationCategory(rawValue: number)?.name ?? "Unknown"
+    }
 }
