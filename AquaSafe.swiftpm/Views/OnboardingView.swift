@@ -12,73 +12,61 @@ struct OnboardingView: View {
     @State private var timer: Timer? = nil // Timer para alterar o índice em loop
     @State private var gradientColors: [Color] = [Color.white, Color.blue]
     @Binding var selectedView: String
+    @StateObject private var viewModel = LocationsViewModel() // Crie a instância do ViewModel aqui
+
     var body: some View {
-        NavigationStack {
-            ZStack {
-                VStack {
-                    Spacer()
-                    Text("AquaSafe")
-                        .font(.largeTitle)
-                        .bold()
+        ZStack {
+            VStack {
+                Spacer(minLength: 40) // Adiciona espaço acima do título
+                Text("AquaSafe")
+                    .font(.largeTitle)
+                    .bold()
+                    .foregroundColor(.white)
+                OnboardingCardView(selectedIndex: $selectedIndex)
+                
+                NavigationLink(destination: HomeView()) {
+                    Text(selectedIndex >= 4 ? "TO START" : "NEXT →")
+                        .frame(minWidth: 300)
+                        .padding(20)
+                        .background(selectedIndex >= 4 ? .accentColor : Color.white.opacity(0.2))
                         .foregroundColor(.white)
-                    Spacer()
-                    OnboardingCardView(selectedIndex: $selectedIndex)
-                    
-                    Button(action: {
-                        if selectedIndex < 4 {
-                            withAnimation { selectedIndex += 1 }
-                        } else {
-                            selectedView = "HomeView" // Alterna para a HomeView
-                        }
-                    }) {
-                        Text(selectedIndex >= 4 ? "Começar" : "Próximo")
-                            .frame(width: 150, height: 20)
-                            .padding(20)
-                            .background(Color.white.opacity(0.2))
-                            .foregroundColor(.white)
-                            .cornerRadius(15)
-                    }
-                    .padding(.bottom, 30)
-                    Spacer()
+                        .cornerRadius(15)
+                        .font(.title3)
                 }
+                .padding(.bottom, 30)
+                Spacer()
             }
-            .background(
-                LinearGradient(gradient: Gradient(colors: gradientColors), startPoint: .topLeading, endPoint: .bottomTrailing)
-                    .ignoresSafeArea()
-            )
-            .onAppear {
-                startTimer()
-                animateGradient()
-            }
-            .onDisappear {
-                timer?.invalidate()
-            }
+        }
+        .background(
+            LinearGradient(gradient: Gradient(colors: gradientColors), startPoint: .topLeading, endPoint: .bottomTrailing)
+                .ignoresSafeArea()
+        )
+        .onAppear {
+            startTimer()
+            animateGradient()
+        }
+        .onDisappear {
+            timer?.invalidate()
         }
     }
 
     private func animateGradient() {
-        Timer.scheduledTimer(withTimeInterval: 4, repeats: true) { _ in
-                DispatchQueue.main.async { // 🔹 Garante que a UI seja atualizada corretamente
-                    withAnimation(.easeInOut(duration: 3)) {
-                        gradientColors = [Color.accentColor, Color.white]
-                    }
-            }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 4) {
+        Timer.scheduledTimer(withTimeInterval: 6, repeats: true) { _ in
+            DispatchQueue.main.async {
                 withAnimation(.easeInOut(duration: 3)) {
-                    gradientColors = [Color.white.opacity(0.3), Color.blue]
+                    gradientColors = gradientColors == [Color.white.opacity(0.3), Color.blue] ? [Color.accentColor, Color.brown] : [Color.white.opacity(0.3), Color.blue]
                 }
             }
         }
     }
+
 
     // Função para iniciar o timer
     private func startTimer() {
         timer?.invalidate() // Cancela o timer anterior, se houver
         timer = Timer.scheduledTimer(withTimeInterval: 3.5, repeats: true) { _ in
-            DispatchQueue.main.async { // 🔹 Garante que a UI seja atualizada corretamente
-                withAnimation(.easeInOut(duration: 1.5)) {
-                    
-                    // Alterar o índice a cada 1,5 segundos em loop
+            DispatchQueue.main.async {
+                withAnimation(.easeInOut(duration: 0.5)) {
                     selectedIndex = (selectedIndex + 1) % 5
                 }
             }
@@ -88,7 +76,7 @@ struct OnboardingView: View {
 
 struct OnboardingCardView: View {
     @Binding var selectedIndex: Int
-    @EnvironmentObject private var viewModel: LocationsViewModel
+    @StateObject private var viewModel = OnboardingViewModel()
 
     var body: some View {
         GeometryReader { geometry in
@@ -97,7 +85,7 @@ struct OnboardingCardView: View {
             ScrollViewReader { scrollProxy in
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: geometry.size.width * 0.05) { // Ajusta o espaçamento com base na largura da tela
-                        ForEach(0..<5, id: \.self) { index in
+                        ForEach(viewModel.cards.indices, id: \.self) { index in
                             GeometryReader { buttonGeometry in
                                 let midX = buttonGeometry.frame(in: .global).midX
                                 let scale = max(0.8, 1 - abs(midX - center) / (geometry.size.width * 0.9)) // Ajusta a escala
@@ -109,24 +97,27 @@ struct OnboardingCardView: View {
                                     }
                                 }) {
                                     ZStack {
-                                        Image("1")
+                                        Image(viewModel.cards[index].imageName)
                                             .resizable()
                                             .scaledToFill()
                                             .frame(width: geometry.size.width * 0.9, height: geometry.size.height * 0.9) // Ajuste proporcional
                                             .clipped()
                                             .clipShape(RoundedRectangle(cornerRadius: 30))
                                         Spacer()
-                                        RadialGradient(colors: [.clear, viewModel.buttonColor(for: index+1).opacity(0.7)], center: .bottom, startRadius: 250, endRadius: 100)
+                                        RadialGradient(colors: [.clear, viewModel.cards[index].backgroundColor], center: .bottom, startRadius: 250, endRadius: 10)
 
                                         VStack {
                                             Spacer()
                                             VStack {
-                                                Text("Title \(index + 1)")
-                                                    .font(.title)
-                                                    .foregroundColor(.white)
-                                                    .bold()
+                                                HStack{
+                                                    LocationMapAnnotationView(iconName: viewModel.cards[index].iconName, color: viewModel.cards[index].backgroundColor)
+                                                    Text(viewModel.cards[index].title)
+                                                        .font(.title)
+                                                        .foregroundColor(.white)
+                                                        .bold()
+                                                }
                                                 
-                                                Text("This is a description for card \(index + 1).")
+                                                Text(viewModel.cards[index].description)
                                                     .font(.subheadline)
                                                     .foregroundColor(.white)
                                                     .padding(.top, 5)
@@ -151,7 +142,6 @@ struct OnboardingCardView: View {
                     .padding(.horizontal, geometry.size.width * 0.10) // Ajusta o padding de acordo com a largura da tela
                 }
                 .onChange(of: selectedIndex) {_, newValue in
-                    // Garantir que a ScrollView será atualizada quando o índice mudar
                     withAnimation {
                         scrollProxy.scrollTo(newValue, anchor: .center)
                     }
@@ -168,84 +158,3 @@ struct ContentView_Previews: PreviewProvider {
             .environmentObject(LocationsViewModel())
     }
 }
-
-
-/*
- import SwiftUI
- 
- struct OnboardingView: View {
- @StateObject private var viewModel = OnboardingViewModel()
- @State private var selectedIndex: Int = 0
- @Binding var selectedView: String
- 
- var body: some View {
- NavigationStack {
- ZStack {
- VStack {
- Spacer()
- Text("AquaSafe")
- .font(.largeTitle)
- .bold()
- .foregroundColor(.white)
- Spacer()
- 
- HorizontalScrollButtons(selectedIndex: $selectedIndex, viewModel: viewModel)
- 
- Button(action: {
- if selectedIndex < viewModel.cards.count - 1 {
- withAnimation { selectedIndex += 1 }
- } else {
- selectedView = "HomeView"
- }
- }) {
- Text(selectedIndex >= viewModel.cards.count - 1 ? "Começar" : "Próximo")
- .frame(width: 150, height: 20)
- .padding(20)
- .background(Color.white.opacity(0.2))
- .foregroundColor(.white)
- .cornerRadius(15)
- }
- .padding(.bottom, 30)
- Spacer()
- }
- }
- .background(LinearGradient(gradient: Gradient(colors: [.blue, .white]), startPoint: .topLeading, endPoint: .bottomTrailing))
- .ignoresSafeArea()
- }
- }
- }
- 
- struct HorizontalScrollButtons: View {
- @Binding var selectedIndex: Int
- @ObservedObject var viewModel: OnboardingViewModel
- 
- var body: some View {
- GeometryReader { geometry in
- let center = geometry.frame(in: .global).midX
- 
- ScrollViewReader { scrollProxy in
- ScrollView(.horizontal, showsIndicators: false) {
- HStack(spacing: geometry.size.width * 0.05) {
- ForEach(viewModel.cards.indices, id: \.self) { index in
- OnboardingCardView(card: viewModel.cards[index])
- .id(index)
- }
- }
- .padding(.horizontal, geometry.size.width * 0.10)
- }
- .onChange(of: selectedIndex) { _, newValue in
- withAnimation {
- scrollProxy.scrollTo(newValue, anchor: .center)
- }
- }
- }
- }
- }
- }
- 
- struct OnboardingView_Previews: PreviewProvider {
- static var previews: some View {
- OnboardingView(selectedView: .constant("home"))
- }
- }
-*/

@@ -15,5 +15,6 @@ struct OnboardingCardModel: Identifiable {
     let title: String
     let description: String
     let imageName: String
+    let iconName: String
     let backgroundColor: Color
 }

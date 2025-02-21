@@ -34,19 +34,10 @@ struct LocationMapAnnotationView: View {
                 .offset(y: -3)
         }
         .shadow(color: color, radius: shadow)
-        /*.onAppear {
-            // Alternar o tamanho do círculo
-            /*Timer.scheduledTimer(withTimeInterval: 2, repeats: true) { _ in
-                withAnimation(.easeInOut(duration: 2)) {
-                    shadow = shadow == 15.0 ? 5.0 : 15.0
-                    //blurAmount = 10.0
-                }
-            }*/
-        }*/
     }
 }
 
-// 🔍 **Prévia com todas as marcações**
+//  **Prévia com todas as marcações**
 struct LocationMapAnnotationView_Previews: PreviewProvider {
     static var previews: some View {
         ZStack {
@@ -62,10 +53,3 @@ struct LocationMapAnnotationView_Previews: PreviewProvider {
         }
     }
 }
-
-/*
- Annotation(coordinate: location.coordinates) {
-     LocationMapAnnotationView(iconName: "drop.fill", color: .blue) // Rua Alagada
- }
-
- */

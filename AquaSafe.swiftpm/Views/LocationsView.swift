@@ -10,7 +10,7 @@ import MapKit
 import CoreLocation
 
 struct LocationsView: View {
-    @State private var selectedView: String = "LocationsView"
+    @Binding var selectedView: String
     @EnvironmentObject private var viewModel: LocationsViewModel
     @State private var isMenuOpen = false
     @State private var showLocationForm: Bool = false
@@ -34,82 +34,85 @@ struct LocationsView: View {
     let maxWidthForIpad: CGFloat = 700
     
     var body: some View {
-        ZStack {
-            SideMenuView(isMenuOpen: $isMenuOpen, selectedView: $selectedView)
-                .animation(.linear(duration: 0.3), value: isMenuOpen)
-            switch selectedView {
-            case "HomeView":
-                HomeView(selectedView: $selectedView)
-            case "NotificationsView":
-                HomeView(selectedView: $selectedView)
-            case "SettingsView":
-                HomeView(selectedView: $selectedView)
-            case "Signout":
-                HomeView(selectedView: $selectedView)
-            default:
-
-                mapLayer.ignoresSafeArea()
-                    .cornerRadius(isMenuOpen ? 20 : 0)
+        NavigationView{
+            
+            ZStack {
+                SideMenuView(isMenuOpen: $isMenuOpen, selectedView: $selectedView)
+                    .animation(.linear(duration: 0.3), value: isMenuOpen)
+                switch selectedView {
+                case "HomeView":
+                    HomeView()
+                case "NotificationsView":
+                    HomeView()
+                case "SettingsView":
+                    HomeView()
+                case "Signout":
+                    HomeView()
+                default:
+                    
+                    mapLayer.ignoresSafeArea()
+                        .cornerRadius(isMenuOpen ? 20 : 0)
+                        .frame(
+                            maxWidth: isMenuOpen ? UIScreen.main.bounds.width * 0.75 : UIScreen.main.bounds.width ,
+                            maxHeight: isMenuOpen ? UIScreen.main.bounds.height * 0.75 : UIScreen.main.bounds.height
+                        )
+                        .offset(x: isMenuOpen ? 250 : 0)
+                        .scaleEffect(isMenuOpen ? 0.85 : 1)
+                        .onTapGesture {
+                            withAnimation {
+                                isMenuOpen = false
+                            }
+                        }
+                        .ignoresSafeArea(.all)
+                        .animation(.spring, value: isMenuOpen)
+                    
+                    // Conteúdo principal com animações suaves
+                    VStack(spacing: 0) {
+                        header
+                            .padding()
+                            .frame(maxWidth: maxWidthForIpad)
+                            .scaleEffect(isMenuOpen ? 0.85 : 1)
+                            .animation(.spring, value: isMenuOpen)
+                        Spacer()
+                        HStack{
+                            Spacer()
+                            if isMenuOpen == false{
+                                categoryLocationAddButtons
+                                    .scaleEffect(isMenuOpen ? 0.85 : 1)
+                                    .animation(.spring, value: isMenuOpen)
+                            }
+                        }
+                        locationsPreviewStack
+                            .scaleEffect(isMenuOpen ? 0.85 : 1)
+                            .animation(.spring, value: isMenuOpen)
+                    }
                     .frame(
-                        maxWidth: isMenuOpen ? UIScreen.main.bounds.width * 0.75 : UIScreen.main.bounds.width ,
+                        maxWidth: isMenuOpen ? UIScreen.main.bounds.width * 0.75 : UIScreen.main.bounds.width,
                         maxHeight: isMenuOpen ? UIScreen.main.bounds.height * 0.75 : UIScreen.main.bounds.height
                     )
                     .offset(x: isMenuOpen ? 250 : 0)
                     .scaleEffect(isMenuOpen ? 0.85 : 1)
+                    .animation(.spring, value: isMenuOpen)
                     .onTapGesture {
                         withAnimation {
                             isMenuOpen = false
                         }
                     }
-                    .ignoresSafeArea(.all)
-                    .animation(.spring, value: isMenuOpen)
-                
-                // Conteúdo principal com animações suaves
-                VStack(spacing: 0) {
-                    header
-                        .padding()
-                        .frame(maxWidth: maxWidthForIpad)
-                        .scaleEffect(isMenuOpen ? 0.85 : 1)
-                        .animation(.spring, value: isMenuOpen)
-                    Spacer()
-                    HStack{
-                        Spacer()
-                        if isMenuOpen == false{
-                            categoryLocationAddButtons
-                                .scaleEffect(isMenuOpen ? 0.85 : 1)
-                                .animation(.spring, value: isMenuOpen)
-                        }
-                    }
-                    locationsPreviewStack
-                        .scaleEffect(isMenuOpen ? 0.85 : 1)
-                        .animation(.spring, value: isMenuOpen)
-                }
-                .frame(
-                    maxWidth: isMenuOpen ? UIScreen.main.bounds.width * 0.75 : UIScreen.main.bounds.width,
-                    maxHeight: isMenuOpen ? UIScreen.main.bounds.height * 0.75 : UIScreen.main.bounds.height
-                )
-                .offset(x: isMenuOpen ? 250 : 0)
-                .scaleEffect(isMenuOpen ? 0.85 : 1)
-                .animation(.spring, value: isMenuOpen)
-                .onTapGesture {
-                    withAnimation {
-                        isMenuOpen = false
-                    }
                 }
             }
-        }
-        .sheet(item: $viewModel.sheetLocation, onDismiss: nil) { location in
-                   LocationDetailView(location: location)
-               }
-        .sheet(isPresented: $showLocationForm) {
-            // Exibir o formulário para adicionar ou editar a localização
-            LocationFormView(viewModel: viewModel, location: $selectedLocation, name: $newLocationName, description: $newLocationDescription, selectedNumber: $selectedNumber, onSave: saveLocation, onDelete: deleteLocation)
+            .sheet(item: $viewModel.sheetLocation, onDismiss: nil) { location in
+                LocationDetailView(location: location)
+            }
+            .sheet(isPresented: $showLocationForm) {
+                // Exibir o formulário para adicionar ou editar a localização
+                LocationFormView(viewModel: viewModel, location: $selectedLocation, name: $newLocationName, description: $newLocationDescription, selectedNumber: $selectedNumber, onSave: saveLocation, onDelete: deleteLocation)
+            }
         }
     }
 }
 struct LocationsView_Previews: PreviewProvider {
     static var previews: some View {
-        LocationsView()
+        LocationsView(selectedView: .constant(""))
             .environmentObject(LocationsViewModel())
     }
 }

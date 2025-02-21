@@ -41,15 +41,7 @@ struct LocationFormView: View {
         }
     }
 }
-/*
- name: "Casa Inundada",
- cityName: "Cidade X",
- coordinates: CLLocationCoordinate2D(latitude: 41.8902, longitude: 12.4922),
- description: "Uma casa inundada, precisa de ajuda.",
- imageNames: ["paris-eiffeltower-1"],
- category: "Casa Inundada",
- icon: "house.badge.exclamationmark",
- color: .red*/
+
 #Preview {
     LocationFormView(
         viewModel: LocationsViewModel(), // Criando um exemplo do ViewModel
