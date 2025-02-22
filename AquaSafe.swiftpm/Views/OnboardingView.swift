@@ -8,35 +8,39 @@
 import SwiftUI
 
 struct OnboardingView: View {
-    @State private var selectedIndex: Int = 0 // Índice do botão atual
-    @State private var timer: Timer? = nil // Timer para alterar o índice em loop
+    @State private var selectedIndex: Int = 0
+    @State private var timer: Timer? = nil
     @State private var gradientColors: [Color] = [Color.white, Color.blue]
     @Binding var selectedView: String
-    @StateObject private var viewModel = LocationsViewModel() // Crie a instância do ViewModel aqui
-
+    @StateObject private var viewModel = LocationsViewModel()
+    @StateObject private var onboardingViewModel = OnboardingViewModel()
+    
     var body: some View {
         ZStack {
             VStack {
-                Spacer(minLength: 40) // Adiciona espaço acima do título
                 Text("AquaSafe")
                     .font(.largeTitle)
                     .bold()
                     .foregroundColor(.white)
+                Spacer()
                 OnboardingCardView(selectedIndex: $selectedIndex)
                 
-                NavigationLink(destination: HomeView()) {
-                    Text(selectedIndex >= 4 ? "TO START" : "NEXT →")
+                NavigationLink(destination: LocationsView().environmentObject(viewModel)) {
+                    Text("TO START")
                         .frame(minWidth: 300)
                         .padding(20)
-                        .background(selectedIndex >= 4 ? .accentColor : Color.white.opacity(0.2))
+                        .background(Color.accentColor)
                         .foregroundColor(.white)
                         .cornerRadius(15)
                         .font(.title3)
                 }
                 .padding(.bottom, 30)
+                
                 Spacer()
             }
         }
+        .navigationBarHidden(true)
+        
         .background(
             LinearGradient(gradient: Gradient(colors: gradientColors), startPoint: .topLeading, endPoint: .bottomTrailing)
                 .ignoresSafeArea()
@@ -49,7 +53,6 @@ struct OnboardingView: View {
             timer?.invalidate()
         }
     }
-
     private func animateGradient() {
         Timer.scheduledTimer(withTimeInterval: 6, repeats: true) { _ in
             DispatchQueue.main.async {
@@ -59,20 +62,22 @@ struct OnboardingView: View {
             }
         }
     }
-
-
-    // Função para iniciar o timer
+    
     private func startTimer() {
-        timer?.invalidate() // Cancela o timer anterior, se houver
+        timer?.invalidate()
         timer = Timer.scheduledTimer(withTimeInterval: 3.5, repeats: true) { _ in
             DispatchQueue.main.async {
-                withAnimation(.easeInOut(duration: 0.5)) {
-                    selectedIndex = (selectedIndex + 1) % 5
+                // Incrementa o índice até o último cartão
+                if selectedIndex < onboardingViewModel.cards.count - 1 {
+                    withAnimation(.easeInOut(duration: 0.5)) {
+                        selectedIndex += 1
+                    }
                 }
             }
         }
     }
 }
+
 
 struct OnboardingCardView: View {
     @Binding var selectedIndex: Int
@@ -158,3 +163,15 @@ struct ContentView_Previews: PreviewProvider {
             .environmentObject(LocationsViewModel())
     }
 }
+
+/*
+ NavigationLink(destination: LocationsView().environmentObject(viewModel)) {
+     Text(selectedIndex >= 4 ? "TO START" : "NEXT →")
+         .frame(minWidth: 300)
+         .padding(20)
+         .background(selectedIndex >= 4 ? .accentColor : Color.white.opacity(0.2))
+         .foregroundColor(.white)
+         .cornerRadius(15)
+         .font(.title3)
+ }
+ */

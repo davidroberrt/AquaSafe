@@ -9,76 +9,64 @@ import SwiftUI
 
 struct HomeView: View {
     @State private var isMenuOpen = false
-    @State private var selectedView: String = "HomeView"
-    @StateObject private var viewModel = LocationsViewModel()
+    @Binding var selectedView: String
+    
     var body: some View {
-        NavigationView{
+        ZStack {
+            Color.green
+            // Menu lateral
+            SideMenuView(isMenuOpen: $isMenuOpen, selectedView: $selectedView) // SideMenuView é o menu lateral que você deve ter configurado
+                .animation(.linear(duration: 0.3), value: isMenuOpen)
+            // Conteúdo principal
             ZStack {
-                Color.green
-                // Menu lateral
-                SideMenuView(isMenuOpen: $isMenuOpen, selectedView: $selectedView) // SideMenuView é o menu lateral que você deve ter configurado
-                    .animation(.linear(duration: 0.3), value: isMenuOpen)
-                switch selectedView {
-                case "LocationsView":
-                    LocationsView(selectedView: $selectedView).environmentObject(viewModel)
-                case "NotificationsView":
-                    HomeView()
-                case "SettingsView":
-                    HomeView()
-                case "Signout":
-                    HomeView()
-                default:
-                    // Conteúdo principal
-                    ZStack {
-                        Color.blue
-                        VStack{
-                            HStack{
-                                Button(action: {
-                                    withAnimation {
-                                        isMenuOpen.toggle() // Alterna o estado do menu
-                                    }
-                                }) {
-                                    Image(systemName: "text.justify.left")
-                                        .font(.headline)
-                                        .padding()
-                                        .background(.thickMaterial.opacity(0.9))
-                                        .cornerRadius(10)
-                                        .fontWeight(.black)
-                                        .frame(height: 55)
-                                        .cornerRadius(10)
-                                }
-                                Spacer()
+                Color.blue
+                VStack{
+                    HStack{
+                        Button(action: {
+                            withAnimation {
+                                isMenuOpen.toggle() // Alterna o estado do menu
                             }
-                            .padding()
-                            // O conteúdo principal da tela, por exemplo:
-                            Text("Welcome to the Home Screen")
-                                .font(.title)
+                        }) {
+                            Image(systemName: "text.justify.left")
+                                .font(.headline)
                                 .padding()
-                            
-                            Spacer()
+                                .background(.thickMaterial.opacity(0.9))
+                                .cornerRadius(10)
+                                .fontWeight(.black)
+                                .frame(height: 55)
+                                .cornerRadius(10)
                         }
+                        Spacer()
                     }
-                    .cornerRadius(isMenuOpen ? 20 : 0)
-                    .frame(
-                        maxWidth: isMenuOpen ? UIScreen.main.bounds.width * 0.75 : UIScreen.main.bounds.width ,
-                        maxHeight: isMenuOpen ? UIScreen.main.bounds.height * 0.75 : UIScreen.main.bounds.height
-                    )
-                    .offset(x: isMenuOpen ? 250 : 0)
-                    .scaleEffect(isMenuOpen ? 0.85 : 1)
-                    .onTapGesture {
-                        withAnimation {
-                            isMenuOpen = false
-                        }
-                    }
-                    .animation(.spring, value: isMenuOpen)
+                    .padding()
+                    // O conteúdo principal da tela, por exemplo:
+                    Text("Welcome to the Home Screen")
+                        .font(.title)
+                        .padding()
+                    
+                    Spacer()
                 }
             }
+            .cornerRadius(isMenuOpen ? 20 : 0)
+            .frame(
+                maxWidth: isMenuOpen ? UIScreen.main.bounds.width * 0.75 : UIScreen.main.bounds.width ,
+                maxHeight: isMenuOpen ? UIScreen.main.bounds.height * 0.75 : UIScreen.main.bounds.height
+            )
+            .offset(x: isMenuOpen ? 250 : 0)
+            .scaleEffect(isMenuOpen ? 0.85 : 1)
+            .onTapGesture {
+                withAnimation {
+                    isMenuOpen = false
+                }
+            }
+            .animation(.spring, value: isMenuOpen)
         }
     }
 }
+
 struct HomeView_Previews: PreviewProvider {
     static var previews: some View {
-        HomeView()
+        HomeView(selectedView: .constant(""))
             .previewDevice("iPhone 14 Pro") // Ajuste o dispositivo conforme necessário
     }
 }

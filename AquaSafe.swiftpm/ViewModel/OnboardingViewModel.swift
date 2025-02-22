@@ -42,6 +42,4 @@ class OnboardingViewModel: ObservableObject {
     ]
 }
 
-#Preview {
-    OnboardingView(selectedView: .constant(""))
-}
+

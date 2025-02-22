@@ -11,6 +11,7 @@ struct SideMenuView: View {
     @Binding var isMenuOpen: Bool
     @Binding var selectedView: String// Tela inicial
     @State private var gradientColors: [Color] = [Color.white, Color.accentColor]
+    @State private var timer: Timer?
     
     var body: some View {
         ZStack {
@@ -39,23 +40,29 @@ struct SideMenuView: View {
                         .padding(.top, 40)
                     Spacer()
                     MenuItem(icon: "house", title: "Home") {
-                        withAnimation(.spring(duration: 3)){
+                        withAnimation(.spring(duration: 1.5)){
                             selectedView = "HomeView"
                             isMenuOpen = false
                         }
                     }
                     MenuItem(icon: "map", title: "Map") {
-                        selectedView = "LocationsView"
-                        isMenuOpen = false
+                        withAnimation(.spring(duration: 1.5)){
+                            selectedView = "LocationsView"
+                            isMenuOpen = false
+                        }
                     }
-
-                    MenuItem(icon: "bell", title: "Notifications") {
-                        selectedView = "NotificationsView"
-                        isMenuOpen = false
+                    
+                    MenuItem(icon: "person.fill.questionmark", title: "Help") {
+                        withAnimation(.spring(duration: 1.5)){
+                            selectedView = "HelpView"
+                            isMenuOpen = false
+                        }
                     }
                     MenuItem(icon: "gearshape", title: "Settings") {
-                        selectedView = "SettingsView"
-                        isMenuOpen = false
+                        withAnimation(.spring(duration: 1.5)){
+                            selectedView = "SettingsView"
+                            isMenuOpen = false
+                        }
                     }
                     Spacer()
                     MenuItem(icon: "arrow.left.circle", title: "Signout") {
@@ -75,24 +82,34 @@ struct SideMenuView: View {
             }
         }
         .background(
-            LinearGradient(
-                gradient: Gradient(colors: gradientColors),
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-            .ignoresSafeArea()
-            .onAppear {
-                animateGradient()
-            }
-        )
-    }
-    private func animateGradient() {
-        Timer.scheduledTimer(withTimeInterval: 5, repeats: true) { _ in
-                DispatchQueue.main.async { // 🔹 Garante que a UI seja atualizada corretamente
-                    withAnimation(.easeInOut(duration: 3)) {
-                        
-                        gradientColors = [Color.accentColor, Color.white]
+                    LinearGradient(
+                        gradient: Gradient(colors: gradientColors),
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                    .ignoresSafeArea()
+                    .onAppear {
+                        if isMenuOpen {
+                            startGradientAnimation()
+                        }
                     }
+                    .onChange(of: isMenuOpen) {_, newValue in
+                        if newValue {
+                            startGradientAnimation()
+                        } else {
+                            stopGradientAnimation()
+                        }
+                    }
+                )
+    }
+    private func startGradientAnimation() {
+        // Inicia o timer para a animação do gradiente
+        stopGradientAnimation()
+        timer = Timer.scheduledTimer(withTimeInterval: 5, repeats: true) { _ in
+            DispatchQueue.main.async {
+                withAnimation(.easeInOut(duration: 3)) {
+                    gradientColors = [Color.accentColor, Color.white]
+                }
             }
             DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
                 withAnimation(.easeInOut(duration: 3)) {
@@ -101,7 +118,15 @@ struct SideMenuView: View {
             }
         }
     }
+    
+    
+    private func stopGradientAnimation() {
+        // Interrompe o timer quando o menu não está aberto
+        timer?.invalidate()
+        timer = nil
+    }
 }
+
 
 
 struct MenuItem: View {
@@ -183,10 +208,10 @@ struct ContentView: View {
         }
     }
 }
-/*
+
 struct SideMenuView_Previews: PreviewProvider {
     static var previews: some View {
-        ContentView(selectedView: $selectedView)
+        ContentView(selectedView: .constant("HomeView"))
     }
 }
-*/
+

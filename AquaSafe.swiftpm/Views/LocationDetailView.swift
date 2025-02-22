@@ -66,11 +66,15 @@ extension LocationDetailView {
     
     private var titleSection: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(location.name)
+            Text(location.category)
                 .font(.largeTitle)
                 .fontWeight(.semibold)
             
             Text(location.cityName)
+                .font(.title3)
+                .foregroundColor(.secondary)
+            
+            Text(location.streetName)
                 .font(.title3)
                 .foregroundColor(.secondary)
         }
@@ -81,6 +85,7 @@ extension LocationDetailView {
             Text(location.description)
                 .font(.subheadline)
                 .foregroundColor(.secondary)
+            
         }
     }
     

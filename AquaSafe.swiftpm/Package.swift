@@ -34,7 +34,9 @@ let package = Package(
             ],
             capabilities: [
                 .locationAlwaysAndWhenInUse(purposeString: "We need your location to show the weather and maps."),
-                .locationWhenInUse(purposeString: "We need your location to show the weather and location maps.")
+                .locationWhenInUse(purposeString: "We need your location to show the weather and location maps."),
+                .fileAccess(.pictureFolder, mode: .readWrite),
+                .photoLibrary(purposeString: "This application needs to access your photo library so that you can select images.")
             ],
             appCategory: .weather
         )

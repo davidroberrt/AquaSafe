@@ -20,10 +20,11 @@ class LocationsViewModel: ObservableObject {
     @Published var mapRegion: MapCameraPosition = .region(
         MKCoordinateRegion(
             center: CLLocationCoordinate2D(latitude: 51.507222, longitude: -0.1275),
-            span: MKCoordinateSpan(latitudeDelta: 1, longitudeDelta: 1)
+            span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)
         )
     )
-    let mapSpan = MKCoordinateSpan(latitudeDelta: 0.1, longitudeDelta: 0.1)
+    
+    let mapSpan = MKCoordinateSpan(latitudeDelta: 0.03, longitudeDelta: 0.03)
     
     @Published var showLocationsList = false
     @Published var showMenuList = false
@@ -42,9 +43,10 @@ class LocationsViewModel: ObservableObject {
             self.mapLocation = Location(
                 name: "Default Location",
                 cityName: "Unknown City",
+                streetName: "Unknown Street",
                 coordinates: CLLocationCoordinate2D(latitude: 51.507222, longitude: -0.1275),
                 description: "This is a default location",
-                imageNames: [],
+                imageNames: ["default_icon"],
                 category: "Default",
                 icon: "default_icon", // exemplo de ícone
                 color: .gray // exemplo de cor
@@ -66,6 +68,45 @@ class LocationsViewModel: ObservableObject {
             )
         }
     }
+    
+    func getCityName(from coordinates: CLLocationCoordinate2D, completion: @escaping (String?) -> Void) {
+        let geocoder = CLGeocoder()
+        let location = CLLocation(latitude: coordinates.latitude, longitude: coordinates.longitude)
+
+        geocoder.reverseGeocodeLocation(location) { placemarks, error in
+            guard error == nil else {
+                print("Error during geocoding: \(String(describing: error))")
+                completion(nil)
+                return
+            }
+            if let placemark = placemarks?.first {
+                completion(placemark.locality) // Retorna o nome da cidade
+            } else {
+                completion(nil)
+            }
+        }
+    }
+    func getStreetName(from coordinate: CLLocationCoordinate2D, completion: @escaping (String?) -> Void) {
+        let geocoder = CLGeocoder()
+        let location = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
+        
+        geocoder.reverseGeocodeLocation(location) { placemarks, error in
+            if let error = error {
+                print("Erro ao obter nome da rua: \(error.localizedDescription)")
+                completion(nil) // Retorna nil em caso de erro
+                return
+            }
+            
+            guard let placemark = placemarks?.first else {
+                completion(nil) // Retorna nil se não houver placemarks
+                return
+            }
+            
+            let streetName = placemark.name // Nome da rua completo
+            completion(streetName)
+        }
+    }
+    
     
     // Toggle visibility of locations list
     func toggleLocationsList() {
@@ -113,5 +154,9 @@ class LocationsViewModel: ObservableObject {
 
     func buttonCategoryName(for number: Int) -> String {
         LocationCategory(rawValue: number)?.name ?? "Unknown"
+    }
+    
+    func buttonImageName(for number: Int) -> String {
+        LocationCategory(rawValue: number)?.image ?? "flood1"
     }
 }

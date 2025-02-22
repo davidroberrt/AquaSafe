@@ -69,7 +69,7 @@ extension LocationPreviewView {
                 .font(.title2)
                 .fontWeight(.bold)
             
-            Text(location.cityName)
+            Text(location.streetName)
                 .font(.subheadline)
         }
         .frame(maxWidth: .infinity, alignment: .leading)

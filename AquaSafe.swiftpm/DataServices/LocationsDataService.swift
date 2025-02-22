@@ -11,60 +11,65 @@ import MapKit
 class LocationsDataService {
     
     static let locations: [Location] = [
-        // Adicionar locais de exemplo para cada categoria
+        // Add sample locations for each category
         Location(
-            name: "Casa Inundada",
-            cityName: "Cidade X",
-            coordinates: CLLocationCoordinate2D(latitude: 41.8902, longitude: 12.4922),
-            description: "Uma casa inundada, precisa de ajuda.",
-            imageNames: ["paris-eiffeltower-1"],
-            category: "Casa Inundada",
+            name: "Flooded House",
+            cityName: "City X",
+            streetName: "Street X",
+            coordinates: CLLocationCoordinate2D(latitude: 41.8895, longitude: 12.5005),
+            description: "A flooded house in need of help.",
+            imageNames: ["flood12"],
+            category: "Flooded House",
             icon: "house.badge.exclamationmark",
             color: .red
         ),
         Location(
-            name: "Rua Alagada",
-            cityName: "Cidade X",
-            coordinates: CLLocationCoordinate2D(latitude: 42.8902, longitude: 12.4922),
-            description: "Rua alagada, perigosa.",
-            imageNames: ["paris-eiffeltower-1"],
-            category: "Rua Alagada",
+            name: "Flooded Street",
+            cityName: "City X",
+            streetName: "Street X",
+            coordinates: CLLocationCoordinate2D(latitude: 41.8891, longitude: 12.5022),
+            description: "Flooded street, dangerous.",
+            imageNames: ["flood11"],
+            category: "Flooded Street",
             icon: "drop.fill",
             color: .blue
         ),
         Location(
-            name: "Área Segura",
-            cityName: "Cidade X",
+            name: "Safe Area",
+            cityName: "City X",
+            streetName: "Street X",
             coordinates: CLLocationCoordinate2D(latitude: 41.8920, longitude: 12.4940),
-            description: "Área segura durante a inundação.",
-            imageNames: ["paris-eiffeltower-1"],
-            category: "Área Segura",
+            description: "Safe area during the flood.",
+            imageNames: ["flood9"],
+            category: "Safe Area",
             icon: "shield.checkerboard",
             color: .green
         ),
         Location(
-            name: "Abrigo",
-            cityName: "Cidade X",
+            name: "Shelter",
+            cityName: "City X",
+            streetName: "Street X",
             coordinates: CLLocationCoordinate2D(latitude: 41.8930, longitude: 12.4950),
-            description: "Abrigo temporário para vítimas.",
-            imageNames: ["paris-eiffeltower-1"],
-            category: "Abrigo",
+            description: "Temporary shelter for victims.",
+            imageNames: ["flood3"],
+            category: "Shelter",
             icon: "tent.fill",
-            color: .yellow
+            color: .orange
         ),
         Location(
-            name: "Ponto de Doação",
-            cityName: "Cidade X",
+            name: "Donation Point",
+            cityName: "City X",
+            streetName: "Street X",
             coordinates: CLLocationCoordinate2D(latitude: 41.8940, longitude: 12.4960),
-            description: "Ponto de doação de suprimentos.",
-            imageNames: ["paris-eiffeltower-1"],
-            category: "Ponto de Doação",
+            description: "Donation point for supplies.",
+            imageNames: ["flood4"],
+            category: "Donation Point",
             icon: "cross.fill",
             color: .purple
         )
     ]
     
-    // Função para obter localizações por categoria
+    // Function to get locations by category
     static func getLocations(for category: String) -> [Location] {
         return locations.filter { $0.category == category }
     }

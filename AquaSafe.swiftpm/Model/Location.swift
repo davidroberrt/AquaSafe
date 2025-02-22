@@ -13,9 +13,10 @@ struct Location: Identifiable, Equatable {
     let id = UUID() // Garante que cada local é único
     let name: String
     let cityName: String
+    let streetName: String
     let coordinates: CLLocationCoordinate2D
     let description: String
-    let imageNames: [String]
+    var imageNames: [String]
     let category: String  // Nova propriedade de categoria
     let icon: String      // Ícone para exibir
     let color: Color     // Cor para exibir
@@ -59,11 +60,21 @@ enum LocationCategory: Int, CaseIterable {
 
     var name: String {
         switch self {
-        case .ruaAlagada: return "Rua Alagada"
-        case .casaInundada: return "Casa Inundada"
-        case .areaSegura: return "Área Segura"
-        case .abrigo: return "Abrigo"
-        case .pontoDeDoacao: return "Ponto de Doação"
+        case .ruaAlagada: return "Flooded Street"
+        case .casaInundada: return "Flooded House"
+        case .areaSegura: return "Safe Area"
+        case .abrigo: return "Shelter"
+        case .pontoDeDoacao: return "Donation Point"
+        }
+    }
+    
+    var image: String {
+        switch self {
+        case .ruaAlagada: return "flood6"
+        case .casaInundada: return "flood7"
+        case .areaSegura: return "flood10"
+        case .abrigo: return "flood9"
+        case .pontoDeDoacao: return "flood8"
         }
     }
     
