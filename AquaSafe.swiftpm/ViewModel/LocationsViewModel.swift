@@ -107,6 +107,21 @@ class LocationsViewModel: ObservableObject {
         }
     }
     
+    func removeLocation(_ location: Location) {
+        if let index = locations.firstIndex(where: { $0.id == location.id }) {
+            locations.remove(at: index)
+
+            // Se a localização removida for a mesma que está no mapa, selecionar outra
+            if mapLocation.id == location.id {
+                if let newLocation = locations.first {
+                    showNextLocation(location: newLocation)
+                } else {
+                    sheetLocation = nil
+                }
+            }
+        }
+    }
+
     
     // Toggle visibility of locations list
     func toggleLocationsList() {

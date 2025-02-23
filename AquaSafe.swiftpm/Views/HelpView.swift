@@ -41,7 +41,7 @@ struct HelpView: View {
                                 .fontWeight(.bold)
                                 .multilineTextAlignment(.center)
                                 .scaleEffect(isMenuOpen ? 0.70 : 1)
-                            
+                            Spacer()
                         }
                         .padding()
                         

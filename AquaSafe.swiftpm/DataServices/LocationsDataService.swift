@@ -11,13 +11,12 @@ import MapKit
 class LocationsDataService {
     
     static let locations: [Location] = [
-        // Add sample locations for each category
         Location(
-            name: "Flooded House",
-            cityName: "City X",
-            streetName: "Street X",
+            name: "Dayane Oliveira",
+            cityName: "Example City",
+            streetName: "Water Street",
             coordinates: CLLocationCoordinate2D(latitude: 41.8895, longitude: 12.5005),
-            description: "A flooded house in need of help.",
+            description: "A house affected by significant flooding, requiring immediate assistance.",
             imageNames: ["flood12"],
             category: "Flooded House",
             icon: "house.badge.exclamationmark",
@@ -25,10 +24,10 @@ class LocationsDataService {
         ),
         Location(
             name: "Flooded Street",
-            cityName: "City X",
-            streetName: "Street X",
+            cityName: "Example City",
+            streetName: "Main Avenue",
             coordinates: CLLocationCoordinate2D(latitude: 41.8891, longitude: 12.5022),
-            description: "Flooded street, dangerous.",
+            description: "A completely flooded street, posing risks to pedestrians and drivers.",
             imageNames: ["flood11"],
             category: "Flooded Street",
             icon: "drop.fill",
@@ -36,21 +35,21 @@ class LocationsDataService {
         ),
         Location(
             name: "Safe Area",
-            cityName: "City X",
-            streetName: "Street X",
+            cityName: "Example City",
+            streetName: "Central Square",
             coordinates: CLLocationCoordinate2D(latitude: 41.8920, longitude: 12.4940),
-            description: "Safe area during the flood.",
+            description: "An elevated area considered safe during floods.",
             imageNames: ["flood9"],
             category: "Safe Area",
             icon: "shield.checkerboard",
             color: .green
         ),
         Location(
-            name: "Shelter",
-            cityName: "City X",
-            streetName: "Street X",
+            name: "Temporary Shelter",
+            cityName: "Example City",
+            streetName: "Shelter Road",
             coordinates: CLLocationCoordinate2D(latitude: 41.8930, longitude: 12.4950),
-            description: "Temporary shelter for victims.",
+            description: "A location providing temporary shelter for the displaced.",
             imageNames: ["flood3"],
             category: "Shelter",
             icon: "tent.fill",
@@ -58,16 +57,17 @@ class LocationsDataService {
         ),
         Location(
             name: "Donation Point",
-            cityName: "City X",
-            streetName: "Street X",
+            cityName: "Example City",
+            streetName: "Donation Avenue",
             coordinates: CLLocationCoordinate2D(latitude: 41.8940, longitude: 12.4960),
-            description: "Donation point for supplies.",
+            description: "A collection point for donations destined for flood victims.",
             imageNames: ["flood4"],
             category: "Donation Point",
             icon: "cross.fill",
             color: .purple
         )
     ]
+
     
     // Function to get locations by category
     static func getLocations(for category: String) -> [Location] {

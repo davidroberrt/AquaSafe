@@ -22,22 +22,38 @@ struct OnboardingView: View {
                     .font(.largeTitle)
                     .bold()
                     .foregroundColor(.white)
+                    .padding()
                 Spacer()
                 OnboardingCardView(selectedIndex: $selectedIndex)
                 
-                NavigationLink(destination: LocationsView().environmentObject(viewModel)) {
-                    Text("TO START")
-                        .frame(minWidth: 300)
-                        .padding(20)
-                        .background(Color.accentColor)
-                        .foregroundColor(.white)
-                        .cornerRadius(15)
-                        .font(.title3)
+                if selectedIndex < onboardingViewModel.cards.count - 1 {
+                    Button(action: {
+                        selectedIndex += 1
+                    }) {
+                        Text("NEXT")
+                            .frame(minWidth: 300)
+                            .padding(20)
+                            .background(Color.white.opacity(0.2))
+                            .foregroundColor(.white)
+                            .cornerRadius(15)
+                            .font(.title3)
+                    }
+                } else {
+                    // Último cartão
+                    NavigationLink(destination: LocationsView().environmentObject(viewModel)) {
+                        Text("TO START")
+                            .frame(minWidth: 300)
+                            .padding(20)
+                            .background(Color.accentColor)
+                            .foregroundColor(.white)
+                            .cornerRadius(15)
+                            .font(.title3)
+                    }
                 }
-                .padding(.bottom, 30)
-                
-                Spacer()
             }
+            .padding(.bottom, 30)
+            
+            Spacer()
         }
         .navigationBarHidden(true)
         

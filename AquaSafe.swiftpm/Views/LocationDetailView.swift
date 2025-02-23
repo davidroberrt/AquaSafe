@@ -11,6 +11,7 @@ import MapKit
 struct LocationDetailView: View {
     
     @EnvironmentObject private var vm: LocationsViewModel
+    @State private var showDeleteConfirmation = false
     let location: Location
     
     var body: some View {
@@ -20,15 +21,23 @@ struct LocationDetailView: View {
                     .shadow(color: Color.black.opacity(0.3), radius: 20, x: 0, y: 10)
                 
                 VStack(alignment: .leading, spacing: 16) {
-                    titleSection
+                    HStack {
+                        titleSection
+                        Spacer()
+                        deleteButton
+                    }
+                    
                     Divider()
                     descriptionSection
                     Divider()
                     mapLayer
-                    Button("Go to Apple Maps") {
+                    Button("Go to Maps") {
                         openMaps()
                     }
-                    .buttonStyle(.borderedProminent)
+                    .frame(maxWidth: .infinity, minHeight: 50)
+                    .foregroundStyle(Color.white)
+                    .background(location.color)
+                    .cornerRadius(20)
                     .padding()
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -38,6 +47,17 @@ struct LocationDetailView: View {
         .ignoresSafeArea()
         .background(.ultraThinMaterial)
         .overlay(backButton, alignment: .topLeading)
+        .alert(isPresented: $showDeleteConfirmation) {
+            Alert(
+                title: Text("Confirm Deletion"),
+                message: Text("Are you sure you want to remove this location?"),
+                primaryButton: .destructive(Text("Delete")) {
+                    vm.removeLocation(location) // Chama a função para remover a localização
+                    vm.sheetLocation = nil
+                },
+                secondaryButton: .cancel()
+            )
+        }
     }
 }
 
@@ -122,7 +142,22 @@ extension LocationDetailView {
                 .padding()
         }
     }
-
+    private var deleteButton: some View {
+        HStack {
+            if let index = vm.locations.firstIndex(where: { $0.id == location.id }), index >= 5 {
+                Button {
+                    showDeleteConfirmation = true // Mostra alerta de confirmação
+                } label: {
+                    Image(systemName: "trash")
+                        .font(.headline)
+                        .padding(10)
+                        .foregroundColor(.white)
+                        .background(.red)
+                        .cornerRadius(10)
+                }
+            }
+        }
+    }
     private func openMaps() {
         let coordinate = location.coordinates
         

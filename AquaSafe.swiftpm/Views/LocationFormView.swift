@@ -32,33 +32,12 @@ struct LocationFormView: View {
                     TextField("State", text: $stateName)
                     TextField("Postal Code", text: $postalCode)
                 }
-                Section(header: Text("Image")) {
-                    PhotosPicker(selection: $selectedItem, matching: .images, photoLibrary: .shared()) {
-                        Text("Select an Image")
-                    }
-                    .onChange(of: selectedItem) {_, newItem in
-                        // Extrai a imagem do PhotosPickerItem
-                        guard let newItem else { return }
-                        Task {
-                            // Obtém a imagem
-                            if let data = try? await newItem.loadTransferable(type: Data.self),
-                               let uiImage = UIImage(data: data) {
-                                selectedImage = uiImage
-                            }
-                        }
-                    }
-                }
                 Section {
                     Button("Save") {
                         onSave()
                         selectedNumber = 0
                     }
                     .disabled(name.isEmpty || description.isEmpty)
-                    
-                    Button("Delete") {
-                        onDelete()
-                    }
-                    .foregroundColor(.red)
                 }
             }
             .navigationTitle("Add \(viewModel.buttonCategoryName(for: selectedNumber))")

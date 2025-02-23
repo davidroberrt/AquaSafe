@@ -12,7 +12,6 @@ import CoreLocation
 struct LocationsView: View {
     @EnvironmentObject private var viewModel: LocationsViewModel
     @StateObject private var locationManager = LocationManager()
-    @State private var selectedImage: UIImage?
     @State private var selectedView: String = "LocationsView"
     @State private var isMenuOpen = false
     @State private var showLocationForm: Bool = false
@@ -20,7 +19,6 @@ struct LocationsView: View {
     @State private var newLocationDescription: String = ""
     @State private var cityName: String = ""
     @State private var streetName: String = ""
-    @State private var imageNames: String = ""
     @State private var selectedLocation: Location?
     @State private var selectedCoordinate: CLLocationCoordinate2D?
     @State private var position = MapCameraPosition.region(
@@ -41,13 +39,13 @@ struct LocationsView: View {
             SideMenuView(isMenuOpen: $isMenuOpen, selectedView: $selectedView)
             switch selectedView {
             case "HomeView":
-                HomeView(selectedView: $selectedView)
+                HelpView(selectedView: $selectedView)
             case "HelpView":
                 HelpView(selectedView: $selectedView)
             case "SettingsView":
-                HomeView(selectedView: $selectedView)
+                SettingsView(selectedView: $selectedView)
             case "Signout":
-                HomeView(selectedView: $selectedView)
+                HelpView(selectedView: $selectedView)
             default:
                 mapLayer
                     .ignoresSafeArea()
@@ -257,19 +255,19 @@ extension LocationsView {
                     }
 
             } else {
-                Map(position: $viewModel.mapRegion) {
+                Map(position: $viewModel.mapRegion, interactionModes: [.all]) {
                     //se o botao de criar nova localizacao for clicado, exibir o annotation:
-                    ForEach(viewModel.locations) { location in
+                    ForEach(viewModel.locations, id: \.self.id) { location in
                         Annotation(location.category, coordinate: location.coordinates) {
                             LocationMapAnnotationView(iconName: location.icon, color: location.color)
                                 .scaleEffect(viewModel.mapLocation == location ? 1 : 0.7)
                                 .onTapGesture {
                                     viewModel.mapLocation = location // Força a atualização
                                     viewModel.showNextLocation(location: location)
-                                    //if let selectedLocation = selectedLocation, let index = viewModel.locations.firstIndex(where: { $0.id == selectedLocation.id }), index >= 5 { // NAO PERMITE ALTERAR 5
-                                        //showLocationForm = true
-                                        //return
-                                    //}
+                                    if let selectedLocation = selectedLocation, let index = viewModel.locations.firstIndex(where: { $0.id == selectedLocation.id }), index >= 5 { // NAO PERMITE ALTERAR 5
+                                        showLocationForm = true
+                                        return
+                                    }
                                 }
                         }
                     }
@@ -313,9 +311,6 @@ extension LocationsView {
         // Obtenha o nome da cidade e salve no estado
         viewModel.getCityName(from: coordinate) { name in
             self.cityName = name ?? "Unknown City"
-        }
-        viewModel.getStreetName(from: coordinate){ name in
-            
         }
         viewModel.getStreetName(from: coordinate){ name in
             self.streetName = name ?? "Unknown Street"

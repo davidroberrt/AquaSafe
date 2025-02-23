@@ -9,6 +9,11 @@ import Foundation
 import MapKit
 import SwiftUI
 
+struct User {
+    var username: String
+    var password: String
+}
+
 struct Location: Identifiable, Equatable {
     let id = UUID() // Garante que cada local é único
     let name: String
