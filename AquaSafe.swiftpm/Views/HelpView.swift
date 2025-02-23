@@ -10,12 +10,14 @@ import SwiftUI
 struct HelpView: View {
     @State private var isMenuOpen = false
     @Binding var selectedView: String
+    @AppStorage("darkMode") private var darkMode: Bool = false // Armazenar a preferência de modo escuro
+
     
     var body: some View {
         ZStack {
             SideMenuView(isMenuOpen: $isMenuOpen, selectedView: $selectedView)
             ZStack{
-                Color.white
+                Color(darkMode ? .black : .white)
                     .ignoresSafeArea()
                 ScrollView {
                     VStack(alignment: .leading, spacing: 20) {

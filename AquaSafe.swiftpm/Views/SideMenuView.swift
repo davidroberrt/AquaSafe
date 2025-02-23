@@ -12,7 +12,10 @@ struct SideMenuView: View {
     @Binding var selectedView: String// Tela inicial
     @State private var gradientColors: [Color] = [Color.white, Color.accentColor]
     @State private var timer: Timer?
-    
+    @AppStorage("darkMode") private var darkMode: Bool = false // Armazenar a preferência de modo escuro
+    @EnvironmentObject var authManager: AuthViewModel
+
+
     var body: some View {
         ZStack {
             Color.white.opacity(0.8).ignoresSafeArea(.all)
@@ -67,7 +70,10 @@ struct SideMenuView: View {
                     Spacer()
                     MenuItem(icon: "arrow.left.circle", title: "Signout") {
                         // Adicione a lógica de logout aqui
+                        authManager.logout()
+
                         isMenuOpen = false
+
                     }
                     Spacer()
                 }
@@ -105,15 +111,15 @@ struct SideMenuView: View {
     private func startGradientAnimation() {
         // Inicia o timer para a animação do gradiente
         stopGradientAnimation()
-        timer = Timer.scheduledTimer(withTimeInterval: 5, repeats: true) { _ in
+        timer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { _ in
             DispatchQueue.main.async {
                 withAnimation(.easeInOut(duration: 3)) {
-                    gradientColors = [Color.accentColor, Color.white]
+                    gradientColors = [Color.accentColor, Color(darkMode ? .black : .white)]
                 }
             }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                 withAnimation(.easeInOut(duration: 3)) {
-                    gradientColors = [Color.white, Color.accentColor]
+                    gradientColors = [Color(darkMode ? .black : .white), Color.accentColor]
                 }
             }
         }

@@ -9,10 +9,11 @@ import Foundation
 import MapKit
 import SwiftUI
 
-struct User {
+struct User: Codable {
     var username: String
     var password: String
 }
+
 
 struct Location: Identifiable, Equatable {
     let id = UUID() // Garante que cada local é único

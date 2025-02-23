@@ -6,46 +6,40 @@
 //
 
 import SwiftUI
-import Combine
 
 class AuthViewModel: ObservableObject {
-    @Published var name: String = ""
+    @AppStorage("storedUsername") private var storedUsername: String = ""
+    @AppStorage("storedPassword") private var storedPassword: String = ""
+    @AppStorage("isAuthenticated") var isAuthenticated: Bool = false
+    
     @Published var username: String = ""
     @Published var password: String = ""
     @Published var confirmPassword: String = ""
-    @Published var isLoggedIn: Bool = false
+    @Published var name: String = ""
     @Published var errorMessage: String?
 
-    func login() {
-        // Recupera a senha armazenada no UserDefaults
-        if let storedPassword = UserDefaults.standard.string(forKey: username) {
-            if storedPassword == password {
-                isLoggedIn = true
-                errorMessage = nil
-            } else {
-                errorMessage = "Invalid username or password."
-            }
+    func register() {
+        guard !username.isEmpty, !password.isEmpty, password == confirmPassword else {
+            errorMessage = "Please fill in all fields correctly."
+            return
+        }
+
+        storedUsername = username
+        storedPassword = password
+        isAuthenticated = false // Após registro, direciona para login
+        errorMessage = nil
+    }
+
+    func login(inputUsername: String, inputPassword: String) {
+        if inputUsername == storedUsername && inputPassword == storedPassword {
+            isAuthenticated = true
+            errorMessage = nil
         } else {
-            errorMessage = "User not found."
+            errorMessage = "Invalid credentials."
         }
     }
 
-    func register() {
-        // Valida os campos
-        if username.isEmpty || password.isEmpty || confirmPassword.isEmpty {
-            errorMessage = "All fields are required."
-            return
-        }
-        if password != confirmPassword {
-            errorMessage = "Passwords do not match."
-            return
-        }
-
-        // Armazena a senha no UserDefaults
-        UserDefaults.standard.set(password, forKey: username)
-        UserDefaults.standard.set(name, forKey: "\(username)_name")
-        
-        errorMessage = nil
-        print("User registered: \(username)")
+    func logout() {
+        isAuthenticated = false
     }
 }

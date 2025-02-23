@@ -10,10 +10,10 @@ import SwiftUI
 struct OnboardingView: View {
     @State private var selectedIndex: Int = 0
     @State private var timer: Timer? = nil
-    @State private var gradientColors: [Color] = [Color.white, Color.blue]
     @Binding var selectedView: String
     @StateObject private var viewModel = LocationsViewModel()
     @StateObject private var onboardingViewModel = OnboardingViewModel()
+    @AppStorage("darkMode") private var darkMode: Bool = false // Armazenar a preferência de modo escuro
     
     var body: some View {
         ZStack {
@@ -40,7 +40,7 @@ struct OnboardingView: View {
                     }
                 } else {
                     // Último cartão
-                    NavigationLink(destination: LocationsView().environmentObject(viewModel)) {
+                    NavigationLink(destination: CredentialView().environmentObject(AuthViewModel())) {
                         Text("TO START")
                             .frame(minWidth: 300)
                             .padding(20)
@@ -55,42 +55,11 @@ struct OnboardingView: View {
             
             Spacer()
         }
-        .navigationBarHidden(true)
-        
         .background(
-            LinearGradient(gradient: Gradient(colors: gradientColors), startPoint: .topLeading, endPoint: .bottomTrailing)
+            LinearGradient(gradient: Gradient(colors: [darkMode == true ? .black : .white, .blue ]), startPoint: .topLeading, endPoint: .bottomTrailing)
                 .ignoresSafeArea()
         )
-        .onAppear {
-            startTimer()
-            animateGradient()
-        }
-        .onDisappear {
-            timer?.invalidate()
-        }
-    }
-    private func animateGradient() {
-        Timer.scheduledTimer(withTimeInterval: 6, repeats: true) { _ in
-            DispatchQueue.main.async {
-                withAnimation(.easeInOut(duration: 3)) {
-                    gradientColors = gradientColors == [Color.white.opacity(0.3), Color.blue] ? [Color.accentColor, Color.brown] : [Color.white.opacity(0.3), Color.blue]
-                }
-            }
-        }
-    }
-    
-    private func startTimer() {
-        timer?.invalidate()
-        timer = Timer.scheduledTimer(withTimeInterval: 3.5, repeats: true) { _ in
-            DispatchQueue.main.async {
-                // Incrementa o índice até o último cartão
-                if selectedIndex < onboardingViewModel.cards.count - 1 {
-                    withAnimation(.easeInOut(duration: 0.5)) {
-                        selectedIndex += 1
-                    }
-                }
-            }
-        }
+        .navigationBarHidden(true)
     }
 }
 
